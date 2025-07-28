@@ -57,6 +57,35 @@ const PriceDisplay = () => {
     }
   }
 
+  useEffect(() => {
+    // Initial fetch for the first load
+    const fetchInitialPrice = async () => {
+      try {
+        const url = process.env.NEXT_PUBLIC_BACKEND_URL
+        const res = await fetch(`${url}/coin/price`)
+        const data = await res.json()
+        setPrice(data.data.WLD.price)
+      } catch (err) {
+        console.error('Error fetching initial price:', err)
+        setError('ไม่สามารถดึงข้อมูลราคาได้')
+      }
+    }
+
+    // Connect to WebSocket
+    if (typeof window !== 'undefined') {
+      connectWebSocket()
+    }
+    
+    fetchInitialPrice()
+
+    // Cleanup function
+    return () => {
+      if (ws.current) {
+        ws.current.close()
+      }
+    }
+  }, [])
+
   return (
     <div className="space-y-4">
       <h2 className="text-2xl font-semibold text-center mb-2">ราคา Worldcoin (WLD)</h2>
